@@ -13,7 +13,7 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   // Use the body parser middleware for post requests
   app.use(bodyParser.json());
 
-  // @TODO1 IMPLEMENT A RESTFUL ENDPOINT
+  //
   // GET /filteredimage?image_url={{URL}}
   // endpoint to filter an image from a public url.
   // IT SHOULD
@@ -29,7 +29,21 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   /**************************************************************************** */
 
-  //! END @TODO1
+  app.get( "/filteredimage/", async (req:express.Request, res:express.Response) => {
+    const query = req.query;
+    const imageUrl = query.image_url;
+    console.log(imageUrl);
+    if (!imageUrl) {
+      res.send("The url does not exist!");
+    } else {
+      const filteredImage = await filterImageFromURL(imageUrl);
+      console.log(filteredImage);
+      res.sendFile(filteredImage);
+      res.on('finish', async function () {
+        await deleteLocalFiles([filteredImage]);
+      });
+    }
+  } );
   
   // Root Endpoint
   // Displays a simple message to the user
