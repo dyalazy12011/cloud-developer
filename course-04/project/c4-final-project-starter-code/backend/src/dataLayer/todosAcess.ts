@@ -1,20 +1,20 @@
 import { createLogger } from '../utils/logger'
 import { TodoItem } from '../models/TodoItem'
 import { TodoUpdate } from '../models/TodoUpdate';
-import * as DynamoDB from 'aws-sdk/clients/dynamodb';
-
-// const XAWS = AWSXRay.captureAWS(AWS);
-
-function createDocumentClient(): DynamoDB.DocumentClient {
-    return new DynamoDB.DocumentClient();;
-}
+import * as AWSXRay from 'aws-xray-sdk'
+import * as AWS  from 'aws-sdk'
 
 const logger = createLogger('TodosAccess')
 
 export class TodoAccess {
-    public constructor(
-        private readonly documentClient: DynamoDB.DocumentClient = createDocumentClient(),
-    ) { }
+    private documentClient: AWS.DynamoDB.DocumentClient;
+
+    public constructor() {
+        const ddbClient = AWSXRay.captureAWSClient(new AWS.DynamoDB());
+        this.documentClient = new AWS.DynamoDB.DocumentClient({
+            service: ddbClient
+        });
+    }
     
     public async createTodo(todo: TodoItem): Promise<TodoItem> {
         const res = await this.documentClient
